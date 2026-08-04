@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>丝网印刷 · 八道工序,亲手走完</title>
+<style>
+:root{
+  --paper:#F6F4EE; --ink:#1B1B17; --sub:#57534A; --line:#E2DED2;
+  --c1:#E2492F; --c2:#2B4C7E; --emul:#3E7C6B; --uv:#7B5CFF;
+  --dk:#181010; --dkpanel:#241614; --dkline:#43261F; --dktext:#F0E3DA; --safe:#FF4B33;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Courier New',monospace;
+  --serif:Georgia,'Songti SC','STSong','Noto Serif SC','SimSun',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.7;-webkit-font-smoothing:antialiased}
+::selection{background:var(--c1);color:#fff}
+
+/* ---------- rail ---------- */
+.rail{position:fixed;left:26px;top:50%;transform:translateY(-50%);z-index:50;list-style:none}
+.rail li{margin:10px 0}
+.rail a{display:flex;align-items:center;gap:9px;text-decoration:none;color:#A9A395;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;transition:color .25s}
+.rail .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid #B9B3A3;background:transparent;flex:none;transition:all .25s}
+.rail li.on a{color:var(--ink)}
+.rail li.on .dot{border-color:var(--ink);transform:scale(1.25)}
+.rail li.ok .dot{background:var(--emul);border-color:var(--emul)}
+.rail li.dk a{color:#7d6a60}
+.rail li.dk.on a{color:var(--safe)}
+@media(max-width:1240px){.rail{display:none}}
+
+/* ---------- hero ---------- */
+.hero{min-height:94vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 24px 40px;position:relative}
+.hero .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:var(--sub);margin-bottom:26px}
+.h1wrap{position:relative;display:inline-block;overflow:visible}
+.hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(38px,6.4vw,76px);letter-spacing:.02em;line-height:1.22;clip-path:inset(-10% 102% -10% 0);animation:reveal 1.5s .35s cubic-bezier(.72,0,.28,1) forwards}
+.h1wrap::after{content:"";position:absolute;top:-8%;bottom:-8%;left:-36px;width:13px;background:var(--ink);border-radius:5px;transform:rotate(4deg);opacity:0;animation:sweep 1.5s .35s cubic-bezier(.72,0,.28,1) forwards}
+@keyframes reveal{to{clip-path:inset(-10% -3% -10% 0)}}
+@keyframes sweep{0%{opacity:1}96%{opacity:1}100%{left:104%;opacity:0}}
+.hero h1 em{font-style:normal;color:var(--c1)}
+.hero .sub{margin-top:26px;font-size:16px;color:var(--sub);max-width:560px}
+.hero .steps-strip{margin-top:52px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 6px;max-width:760px;font-family:var(--mono);font-size:11px;color:var(--sub)}
+.hero .steps-strip span{border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:#fff}
+.hero .steps-strip .arr{border:none;background:none;padding:5px 0;color:#C4BEAE}
+.hero .cta{margin-top:44px;display:inline-block;background:var(--ink);color:var(--paper);text-decoration:none;font-size:14.5px;padding:13px 34px;border-radius:999px;letter-spacing:.08em;transition:transform .2s}
+.hero .cta:hover{transform:translateY(-2px)}
+.hero .down{position:absolute;bottom:26px;font-family:var(--mono);font-size:11px;color:#B0AA9A;letter-spacing:.2em}
+
+/* ---------- steps ---------- */
+.step{padding:104px 24px}
+.step-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:360px 1fr;gap:52px;align-items:start}
+@media(max-width:920px){.step-inner{grid-template-columns:1fr;gap:28px}}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--sub);display:flex;align-items:center;gap:10px}
+.eyebrow .ok-badge{display:none;color:var(--emul);letter-spacing:0;font-size:13px}
+.step.done .eyebrow .ok-badge{display:inline}
+.step h2{font-family:var(--serif);font-size:clamp(26px,3vw,34px);font-weight:600;margin:14px 0 18px;letter-spacing:.02em}
+.step .txt p{font-size:14.5px;color:var(--sub);margin-bottom:13px}
+.step .txt strong{color:var(--ink);font-weight:600}
+.term{border-bottom:1px dashed #B7B19F;cursor:help}
+.tip{margin-top:18px;font-family:var(--mono);font-size:11.5px;color:#8B8574;border-left:2px solid var(--line);padding-left:12px;line-height:1.8}
+
+/* ---------- stage ---------- */
+.stage{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.stage canvas{width:100%;height:auto;display:block;border-radius:8px;touch-action:none;cursor:crosshair}
+.veil{position:absolute;inset:0;z-index:5;border-radius:16px;background:rgba(246,244,238,.82);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12.5px;color:var(--sub);letter-spacing:.1em}
+.stage.open .veil{display:none}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
+.btn{font-family:var(--sans);font-size:13.5px;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:9px 22px;cursor:pointer;letter-spacing:.04em;transition:opacity .2s,transform .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.read{font-family:var(--mono);font-size:12px;color:var(--sub)}
+.msg{font-family:var(--mono);font-size:12px;color:var(--sub);width:100%;min-height:1.5em}
+.msg.bad{color:#C0392B}
+.msg.good{color:var(--emul)}
+input[type=range]{accent-color:var(--ink);width:180px}
+.chip{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.meter{position:relative;flex:1;min-width:160px;height:12px;background:#EDEAE0;border-radius:99px;overflow:hidden}
+.meter .tgt{position:absolute;top:0;bottom:0;background:rgba(62,124,107,.28)}
+.meter .fill{position:absolute;top:0;bottom:0;left:0;width:0%;background:var(--uv);border-radius:99px;transition:width .05s linear}
+
+/* ---------- darkroom ---------- */
+.darkroom{background:var(--dk);color:var(--dktext);position:relative}
+.dk-enter,.dk-exit{max-width:1080px;margin:0 auto;padding:38px 24px 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;color:#8f7266;display:flex;align-items:center;gap:12px}
+.dk-exit{padding:0 24px 38px}
+.dk-enter .lamp{width:9px;height:9px;border-radius:50%;background:var(--safe);box-shadow:0 0 14px 3px rgba(255,75,51,.65);animation:lampPulse 2.6s infinite}
+@keyframes lampPulse{0%,100%{box-shadow:0 0 14px 3px rgba(255,75,51,.65)}50%{box-shadow:0 0 22px 6px rgba(255,75,51,.9)}}
+.darkroom .eyebrow{color:#9d8073}
+.darkroom h2{color:var(--dktext)}
+.darkroom .txt p{color:#C9B4A8}
+.darkroom .txt strong{color:var(--dktext)}
+.darkroom .tip{color:#8f7266;border-left-color:var(--dkline)}
+.darkroom .term{border-bottom-color:#6b4a3f}
+.darkroom .stage{background:var(--dkpanel);border-color:var(--dkline);box-shadow:none}
+.darkroom .veil{background:rgba(24,16,16,.85);color:#9d8073}
+.darkroom .btn{background:var(--dktext);color:var(--dk)}
+.darkroom .btn.ghost{background:transparent;color:var(--dktext);border-color:#6b5248}
+.darkroom .read,.darkroom .msg{color:#9d8073}
+.darkroom .msg.bad{color:var(--safe)}
+.darkroom .msg.good{color:#7FBFA8}
+.darkroom .meter{background:#3a2620}
+.darkroom input[type=range]{accent-color:var(--dktext)}
+
+/* ---------- finale ---------- */
+.finale .step-inner{grid-template-columns:360px 1fr}
+.recap{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:16px;font-family:var(--mono);font-size:12px;color:var(--sub);line-height:2.1}
+.recap.show{display:block}
+.recap b{color:var(--ink);font-weight:600}
+footer{padding:70px 24px 90px;text-align:center;font-family:var(--mono);font-size:11.5px;color:#A9A395;letter-spacing:.14em}
+footer .re{color:var(--ink);cursor:pointer;border-bottom:1px solid var(--ink)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  .hero h1{clip-path:none}
+}
+</style>
+</head>
+<body>
+<ul class="rail" id="rail">
+  <li data-s="s1"><a href="#s1"><span class="dot"></span>01 分色</a></li>
+  <li data-s="s2"><a href="#s2"><span class="dot"></span>02 绷网</a></li>
+  <li data-s="s3" class="dk"><a href="#s3"><span class="dot"></span>03 涂乳剂</a></li>
+  <li data-s="s4" class="dk"><a href="#s4"><span class="dot"></span>04 曝光</a></li>
+  <li data-s="s5" class="dk"><a href="#s5"><span class="dot"></span>05 显影</a></li>
+  <li data-s="s6"><a href="#s6"><span class="dot"></span>06 对位</a></li>
+  <li data-s="s7"><a href="#s7"><span class="dot"></span>07 刮印</a></li>
+  <li data-s="s8"><a href="#s8"><span class="dot"></span>08 烘干</a></li>
+</ul>
+
+<header class="hero">
+  <div class="eyebrow">SCREEN PRINTING · 一间线上丝印工坊</div>
+  <div class="h1wrap"><h1>一块网,如何印出<br>一张<em>两色</em>版画</h1></div>
+  <p class="sub">丝网印刷的全部秘密,是让墨只从网上"该漏的地方"漏下去。下面按真实工坊的顺序,八道工序,每一道都由你亲手完成。</p>
+  <div class="steps-strip">
+    <span>分色出菲林</span><span class="arr">→</span><span>绷网</span><span class="arr">→</span><span>涂感光乳剂</span><span class="arr">→</span><span>曝光</span><span class="arr">→</span><span>冲洗显影</span><span class="arr">→</span><span>上机对位</span><span class="arr">→</span><span>刮印套色</span><span class="arr">→</span><span>烘干固化</span>
+  </div>
+  <a class="cta" href="#s1">从第一道工序开始</a>
+  <div class="down">SCROLL ↓</div>
+</header>
+
+<!-- 01 分色 -->
+<section class="step" id="s1">
+  <div class="step-inner">
+    <div class="txt">
+      <div class="eyebrow">工序 01 / 08 · PRE-PRESS <span class="ok-badge">✓ 已完成</span></div>
+      <h2>分色,输出菲林</h2>
+      <p>丝网印刷<strong>一次只能印一种颜色</strong>。所以第一步是把原稿按颜色拆开:红色的归红版,蓝色的归蓝版。</p>
+      <p>每一层都被打印在透明胶片上,图案部分是<strong>不透光的实黑</strong>——这张胶片叫<span class="term" title="Film positive:透明片基上印不透光黑色图案,用于挡住曝光的紫外光">菲林(片基)</span>,之后曝光时它负责"挡光"。</p>
+      <div class="tip">拖动滑块,把这张两色原稿拆成两张菲林。<br>注意:菲林上不分红蓝,一律是黑——它只关心挡不挡光。</div>
+    </div>
+    <div class="stage open" id="stage1">
+      <canvas id="cv1" width="760" height="500"></canvas>
+      <div class="bar">
+        <span class="read">合稿</span>
+        <input type="range" id="sep" min="0" max="100" value="0">
+        <span class="read">分色</span>
+        <div class="msg" id="msg1"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 绷网 -->
+<section class="step" id="s2">
+  <div class="step-inner">
+    <div class="txt">
+      <div class="eyebrow">工序 02 / 08 · SCREEN <span class="ok-badge">✓ 已完成</span></div>
+      <h2>绷网</h2>
+      <p>把涤纶网布绷在铝框上,像绷鼓皮。网布的<span class="term" title="每厘米长度内的网丝数量,数字越大网孔越细">目数</span>决定过墨量:目数低,网孔大,下墨厚;目数高,网孔细,能印住细节。</p>
+      <p>然后是<strong>张力</strong>。太松,印刷时网布拖泥带水、图案发虚;太紧,网布会撕裂。工坊里用张力计测,合格区间大约 <strong>18–25 N/cm</strong>。</p>
+      <div class="tip">① 选一个目数(本次印粗线条图案,120 目正合适)<br>② 按住「拉紧」给网布加张力,指针进入绿色区间后松手,点「锁紧网框」。</div>
+    </div>
+    <div class="stage" id="stage2">
+      <div class="veil">🔒 先完成上一道工序</div>
+      <canvas id="cv2" width="760" height="500"></canvas>
+      <div class="bar">
+        <button class="chip" data-mesh="80">80 目 · 粗</button>
+        <button class="chip on" data-mesh="120">120 目 · 通用</button>
+        <button class="chip" data-mesh="200">200 目 · 精细</button>
+        <div class="meter" id="tenM"><div class="tgt" style="left:60%;width:23%"></div><div class="fill" id="tenF" style="background:var(--emul)"></div></div>
+        <button class="btn ghost" id="pull2">按住拉紧</button>
+        <button class="btn" id="lock2" disabled>锁紧网框</button>
+        <div class="msg" id="msg2"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- darkroom -->
+<div class="darkroom">
+  <div class="dk-enter"><span class="lamp"></span>进入暗房 · 感光乳剂怕紫外光,这里只开红色安全灯</div>
+
+  <!-- 03 涂乳剂 -->
+  <section class="step" id="s3">
+    <div class="step-inner">
+      <div class="txt">
+        <div class="eyebrow">工序 03 / 08 · DARKROOM <span class="ok-badge">✓ 已完成</span></div>
+        <h2>涂感光乳剂</h2>
+        <p>用<span class="term" title="Scoop coater:一条带槽的铝制刮斗,槽里盛乳剂,贴网上刮">上浆器</span>盛满感光乳剂,贴住网面,<strong>从下往上匀速刮</strong>,给整张网糊上一层薄而均匀的绿色浆膜。</p>
+        <p>这层乳剂现在是水溶性的;但只要被紫外光照到,它就会<strong>硬化、变得不溶于水</strong>——这个特性是下面两步的全部原理。</p>
+        <div class="tip">按住鼠标,从网的底部向顶部拖,一条一条刮满整张网(覆盖率 ≥ 95%)。刮完点「进入曝光」。</div>
+      </div>
+      <div class="stage" id="stage3">
+        <div class="veil">🔒 先完成上一道工序</div>
+        <canvas id="cv3" width="760" height="500"></canvas>
+        <div class="bar">
+          <span class="read">覆盖率 <b id="coatPct">0%</b></span>
+          <button class="btn" id="done3" disabled>进入曝光</button>
+          <div class="msg" id="msg3"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 曝光 -->
+  <section class="step" id="s4">
+    <div class="step-inner">
+      <div class="txt">
+        <div class="eyebrow">工序 04 / 08 · DARKROOM <span class="ok-badge">✓ 已完成</span></div>
+        <h2>曝光</h2>
+        <p>把第一张菲林(红版)贴在干透的乳剂面上,压上玻璃,下方紫外灯箱亮起。</p>
+        <p><strong>菲林上黑色图案挡住的地方</strong>,乳剂晒不到光,保持水溶;<strong>其余透光的地方</strong>,乳剂被晒硬。图案就这样以"没晒到"的形式被记录在网上。</p>
+        <p>曝光时间是丝印的命门:不足,硬化不牢,冲洗时整版脱落;过度,光会绕到菲林边缘下面,细节糊死。</p>
+        <div class="tip">按住「曝光」蓄积曝光量,进度进入绿色区间后松手。失手了可以洗掉重来——工坊里也是这么干的。</div>
+      </div>
+      <div class="stage" id="stage4">
+        <div class="veil">🔒 先完成上一道工序</div>
+        <canvas id="cv4" width="760" height="500"></canvas>
+        <div class="bar">
+          <div class="meter" id="expM"><div class="tgt" style="left:62%;width:20%"></div><div class="fill" id="expF"></div></div>
+          <button class="btn ghost" id="hold4">按住曝光</button>
+          <button class="btn" id="redo4" style="display:none">洗掉重来</button>
+          <div class="msg" id="msg4"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 显影 -->
+  <section class="step" id="s5">
+    <div class="step-inner">
+      <div class="txt">
+        <div class="eyebrow">工序 05 / 08 · DARKROOM <span class="ok-badge">✓ 已完成</span></div>
+        <h2>冲洗显影</h2>
+        <p>拿水枪冲网。<strong>晒硬的乳剂纹丝不动;被菲林挡住、没晒到光的图案部分,乳剂溶于水,哗啦冲开</strong>——网孔在图案处重新露出来。</p>
+        <p>冲完对着光看:图案的形状变成了网上一个个透亮的镂空。这张"该漏墨的地方漏、不该漏的地方封死"的网,叫<span class="term" title="Stencil:附着在丝网上的镂空模版,墨只能从镂空处透过">网版</span>。制版到此完成。</p>
+        <div class="tip">按住鼠标在网面上来回冲洗,把图案区域全部冲透(≥ 95%)。只有没晒到光的地方冲得开——不信你冲冲别处。</div>
+      </div>
+      <div class="stage" id="stage5">
+        <div class="veil">🔒 先完成上一道工序</div>
+        <canvas id="cv5" width="760" height="500"></canvas>
+        <div class="bar">
+          <span class="read">显影 <b id="washPct">0%</b></span>
+          <div class="msg" id="msg5"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="dk-exit"><span class="lamp" style="width:9px;height:9px;border-radius:50%;background:var(--safe)"></span>网版制好,晾干 · 关灯,离开暗房</div>
+</div>
+
+<!-- 06 对位 -->
+<section class="step" id="s6">
+  <div class="step-inner">
+    <div class="txt">
+      <div class="eyebrow">工序 06 / 08 · PRESS <span class="ok-badge">✓ 已完成</span></div>
+      <h2>上机,对位</h2>
+      <p>网版装上印刷台的合页夹头,纸固定在台面上。印两个颜色要用两张网版,它们必须印在<strong>同一个位置</strong>——这靠<span class="term" title="Registration:多色印刷中让各色版精确落在同一坐标的过程">对位</span>。</p>
+      <p>网版四角有十字对位标。拖动台面上的纸,让纸上的十字与网版的十字重合。</p>
+      <p>对位差之毫厘,两色就会错开——不过老师傅会告诉你:<strong>手工丝印差个半毫米,是它的体温</strong>。</p>
+      <div class="tip">拖动纸张对齐十字标,误差 ≤ 2mm 时点「锁定台面」。你留下的残余误差,会原样带进下一步的套色里。</div>
+    </div>
+    <div class="stage" id="stage6">
+      <div class="veil">🔒 先完成上一道工序</div>
+      <canvas id="cv6" width="760" height="500"></canvas>
+      <div class="bar">
+        <span class="read">偏差 <b id="regRead">--</b></span>
+        <button class="btn" id="lock6" disabled>锁定台面</button>
+        <div class="msg" id="msg6"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 刮印 -->
+<section class="step" id="s7">
+  <div class="step-inner">
+    <div class="txt">
+      <div class="eyebrow">工序 07 / 08 · PRESS <span class="ok-badge">✓ 已完成</span></div>
+      <h2>倒墨,刮印,套色</h2>
+      <p>落下网框,在网版上端倒一条墨。双手压住<span class="term" title="Squeegee:木柄夹橡胶条的刮板,靠压力把墨压过网孔">刮刀</span>,呈 75° 角,<strong>匀速、一次性地从上拉到下</strong>——墨被压过镂空的网孔,落在纸面上。抬网,第一色完成。</p>
+      <p>换第二张网版(蓝版),重复:倒墨、刮印、抬网。两色叠住的地方,油墨半透明相乘,生出第三种颜色——这是套色送的礼物。</p>
+      <div class="tip">① 点「倒墨」 ② 按住鼠标从网顶一口气拖到网底(中途松手会印残) ③ 抬网看效果,再印第二色。</div>
+    </div>
+    <div class="stage" id="stage7">
+      <div class="veil">🔒 先完成上一道工序</div>
+      <canvas id="cv7" width="760" height="500"></canvas>
+      <div class="bar">
+        <span class="read" id="passRead">第 1 色 · 红版</span>
+        <button class="btn ghost" id="ink7">倒墨</button>
+        <button class="btn" id="lift7" disabled>抬网</button>
+        <div class="msg" id="msg7"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 烘干 -->
+<section class="step finale" id="s8">
+  <div class="step-inner">
+    <div class="txt">
+      <div class="eyebrow">工序 08 / 08 · CURE <span class="ok-badge">✓ 已完成</span></div>
+      <h2>烘干固化</h2>
+      <p>刚印完的水性墨只是趴在纸面上,一蹭就花。送进烘道,<strong>160°C 左右烘上几十秒</strong>,墨层交联固化,才算真正"长"在了纸上。</p>
+      <p>出烘道的那一张,就是你的成品:两块色版、一次对位、两道刮印——和 1907 年拿到第一张丝网印刷专利的工匠做的,是同一件事。</p>
+      <div class="tip">点「送入烘道」,等它出来。</div>
+      <div class="recap" id="recap"></div>
+    </div>
+    <div class="stage" id="stage8">
+      <div class="veil">🔒 先完成上一道工序</div>
+      <canvas id="cv8" width="760" height="500"></canvas>
+      <div class="bar">
+        <button class="btn" id="cure8">送入烘道</button>
+        <button class="btn ghost" id="save8" style="display:none">下载成品</button>
+        <div class="msg" id="msg8"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  八道工序 · 一张两色版画 · <span class="re" id="restart">重新开一版</span>
+</footer>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const C1=getComputedStyle(document.documentElement).getPropertyValue('--c1').trim()||'#E2492F';
+const C2=getComputedStyle(document.documentElement).getPropertyValue('--c2').trim()||'#2B4C7E';
+const EMUL='#3E7C6B', EMUL_HARD='#2A5A4C';
+const MONO='11px ui-monospace,Menlo,monospace';
+
+/* ---------- artwork (art space 320x400) ---------- */
+const AW=320,AH=400;
+function redShapes(c){
+  c.beginPath();c.arc(160,150,85,0,7);c.fill();
+  c.lineWidth=14;c.lineCap='round';
+  for(let i=0;i<8;i++){const a=i*Math.PI/4+.39;
+    c.beginPath();c.moveTo(160+Math.cos(a)*104,150+Math.sin(a)*104);
+    c.lineTo(160+Math.cos(a)*130,150+Math.sin(a)*130);c.stroke();}
+}
+function blueShapes(c){
+  c.beginPath();c.moveTo(14,392);c.lineTo(118,206);c.lineTo(196,330);c.lineTo(250,236);c.lineTo(306,392);c.closePath();c.fill();
+  c.beginPath();c.arc(52,74,17,0,7);c.fill();
+}
+function mkLayer(fn,color){const c=document.createElement('canvas');c.width=AW;c.height=AH;
+  const x=c.getContext('2d');x.fillStyle=color;x.strokeStyle=color;fn(x);return c;}
+const redMask=mkLayer(redShapes,'#111'), blueMask=mkLayer(blueShapes,'#111');
+const redTint=mkLayer(redShapes,C1),   blueTint=mkLayer(blueShapes,C2);
+function maskData(m){return m.getContext('2d').getImageData(0,0,AW,AH).data;}
+const redData=maskData(redMask);
+const inRed=(x,y)=>x>=0&&y>=0&&x<AW&&y<AH&&redData[((y|0)*AW+(x|0))*4+3]>128;
+
+/* screen geometry on 760x500 canvases */
+const S={x:150,y:60,w:460,h:380};
+const SC=.95, AX=S.x+(S.w-AW*SC)/2, AY=S.y+(S.h-AH*SC)/2;
+const a2c=(x,y)=>({x:AX+x*SC,y:AY+y*SC});          // art -> canvas
+const c2a=(x,y)=>({x:(x-AX)/SC,y:(y-AY)/SC});      // canvas -> art
+
+/* ---------- shared helpers ---------- */
+const stats={mesh:120,tension:0,coat:0,exp:0,regmm:0};
+function ctx(n){return $('cv'+n).getContext('2d');}
+function pos(cv,e){const r=cv.getBoundingClientRect();
+  return{x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height};}
+function say(n,txt,cls){const m=$('msg'+n);m.className='msg '+(cls||'');m.textContent=txt;}
+function drawFrame(c,ry){const y=ry===undefined?S.y:ry;
+  c.fillStyle='#C9CDD1';c.strokeStyle='#9AA0A6';c.lineWidth=1.5;
+  const t=16;
+  c.fillRect(S.x-t,y-t,S.w+2*t,t);c.fillRect(S.x-t,y+S.h,S.w+2*t,t);
+  c.fillRect(S.x-t,y-t,t,S.h+2*t);c.fillRect(S.x+S.w,y-t,t,S.h+2*t);
+  c.strokeRect(S.x-t,y-t,S.w+2*t,S.h+2*t);c.strokeRect(S.x,y,S.w,S.h);}
+function drawMesh(c,spacing,alpha,sag,ry){const y0=ry===undefined?S.y:ry;
+  c.save();c.globalAlpha=alpha;c.strokeStyle='#8E9296';c.lineWidth=.6;
+  for(let x=S.x;x<=S.x+S.w;x+=spacing){c.beginPath();c.moveTo(x,y0);c.lineTo(x,y0+S.h);c.stroke();}
+  for(let y=y0;y<=y0+S.h;y+=spacing){c.beginPath();c.moveTo(S.x,y);
+    c.quadraticCurveTo(S.x+S.w/2,y+(sag||0),S.x+S.w,y);c.stroke();}
+  c.restore();}
+function paperBG(c){c.fillStyle='#EDEAE2';c.fillRect(0,0,760,500);}
+function label(c,txt,x,y,col){c.fillStyle=col||'#8B8574';c.font=MONO;c.textAlign='center';c.fillText(txt,x,y);c.textAlign='left';}
+
+/* ---------- gating ---------- */
+const railLis={};document.querySelectorAll('#rail li').forEach(li=>railLis[li.dataset.s]=li);
+function finish(n){
+  const sec=$('s'+n);sec.classList.add('done');
+  railLis['s'+n]&&railLis['s'+n].classList.add('ok');
+  const nxt=$('stage'+(n+1));if(nxt)nxt.classList.add('open');
+  if(n===2)initS3();if(n===3)initS4();if(n===4)initS5();
+  if(n===5)initS6();if(n===6)initS7();if(n===7)initS8();
+}
+/* rail highlight */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){document.querySelectorAll('#rail li').forEach(l=>l.classList.remove('on'));
+    const li=railLis[e.target.id];li&&li.classList.add('on');}
+}),{rootMargin:'-40% 0px -50% 0px'});
+document.querySelectorAll('.step').forEach(s=>io.observe(s));
+
+/* ================= 01 分色 ================= */
+(function(){
+const c=ctx(1),cv=$('cv1');let done=false;
+function film(c,x,y,w,h,mask,lab,alpha){
+  c.save();c.globalAlpha=alpha;
+  c.fillStyle='rgba(190,200,210,.35)';c.strokeStyle='#B9C2CB';c.lineWidth=1.5;
+  c.beginPath();c.roundRect(x,y,w,h,6);c.fill();c.stroke();
+  c.fillStyle='rgba(255,255,255,.5)';c.fillRect(x+6,y+6,w-12,5);
+  const s=(w-24)/AW;c.drawImage(mask,x+12,y+14,AW*s,AH*s);
+  label(c,lab,x+w/2,y+h+20,'#57534A');c.restore();}
+function draw(t){
+  c.clearRect(0,0,760,500);
+  /* original */
+  const os=.42,ow=AW*os,oh=AH*os,ox=380-ow/2,oy=26;
+  c.fillStyle='#fff';c.strokeStyle='#E2DED2';c.lineWidth=1;
+  c.fillRect(ox-10,oy-8,ow+20,oh+16);c.strokeRect(ox-10,oy-8,ow+20,oh+16);
+  c.globalCompositeOperation='multiply';
+  c.drawImage(redTint,ox,oy,ow,oh);c.drawImage(blueTint,ox,oy,ow,oh);
+  c.globalCompositeOperation='source-over';
+  label(c,'原稿(两色)',380,oy+oh+22);
+  /* films slide out */
+  const fw=176,fh=234,fy=248,cx=380-fw/2,e=t*t*(3-2*t);
+  film(c,cx+(78-cx)*e, fy,fw,fh,redMask,'红版菲林 · 挡光为黑',Math.max(.15,e));
+  film(c,cx+(506-cx)*e,fy,fw,fh,blueMask,'蓝版菲林 · 挡光为黑',Math.max(.15,e));
+  if(t>0&&t<1){c.fillStyle='#B0AA9A';c.font=MONO;c.textAlign='center';
+    c.fillText('· 按颜色拆分中 ·',380,240);c.textAlign='left';}
+}
+draw(0);
+$('sep').addEventListener('input',e=>{
+  const t=e.target.value/100;draw(t);
+  if(t>=.98&&!done){done=true;say(1,'✓ 两张菲林出片完成。它们不带颜色信息,只负责挡光。','good');finish(1);}
+  else if(!done)say(1,t>.4?'红归红,蓝归蓝,各印成一张黑色菲林…':'');
+});
+})();
+
+/* ================= 02 绷网 ================= */
+(function(){
+const c=ctx(2);let ten=0,hold=false,locked=false,raf;
+const chips=document.querySelectorAll('#stage2 .chip');
+chips.forEach(ch=>ch.addEventListener('click',()=>{if(locked)return;
+  chips.forEach(o=>o.classList.remove('on'));ch.classList.add('on');
+  stats.mesh=+ch.dataset.mesh;draw();}));
+function spacing(){return stats.mesh===80?8:stats.mesh===200?3.4:5.4;}
+function draw(){
+  c.clearRect(0,0,760,500);paperBG(c);
+  const sag=Math.max(0,(1-ten/22))*14;
+  drawFrame(c);drawMesh(c,spacing(),.85,sag);
+  c.fillStyle='#57534A';c.font=MONO;
+  c.fillText(stats.mesh+' 目 · 网孔 '+(stats.mesh===80?'粗,下墨厚':stats.mesh===200?'细,重细节':'通用'),S.x,S.y-30);
+  c.fillText('张力 '+ten.toFixed(1)+' N/cm'+(ten>=18&&ten<=25?'  ✓ 合格区间':''),S.x+250,S.y-30);
+  /* clamps */
+  c.fillStyle='#57534A';
+  for(let i=0;i<4;i++){c.fillRect(S.x+40+i*115,S.y+S.h+16,36,12);}
+  label(c,'气动绷网夹头',S.x+S.w/2,S.y+S.h+52);
+}
+function tick(ts){
+  if(locked)return;
+  if(hold)ten=Math.min(30,ten+0.14);else ten=Math.max(0,ten-0.06);
+  $('tenF').style.width=(ten/30*100)+'%';
+  $('lock2').disabled=!(ten>=18&&ten<=25);
+  if(ten>26.5&&hold){hold=false;ten=0;$('tenF').style.width='0%';
+    say(2,'✗ 拉过头了——网布撕裂!换一块网,重新拉。','bad');draw();raf=requestAnimationFrame(tick);return;}
+  draw();raf=requestAnimationFrame(tick);
+}
+const pb=$('pull2');
+const start=e=>{e.preventDefault();if(locked)return;hold=true;say(2,'张力上升中…进入绿色区间就松手');};
+const stop=()=>{if(hold&&!locked){hold=false;if(ten<18)say(2,'松手后张力回弹——没锁紧前网布会松,继续拉。');}};
+pb.addEventListener('pointerdown',start);
+addEventListener('pointerup',stop);
+$('lock2').addEventListener('click',()=>{
+  if(ten<18||ten>25)return;locked=true;stats.tension=+ten.toFixed(1);
+  cancelAnimationFrame(raf);draw();
+  say(2,'✓ 网框锁紧,张力 '+stats.tension+' N/cm。这张 '+stats.mesh+' 目的网,跟你走完后面六道工序。','good');
+  finish(2);
+});
+draw();tick();
+})();
+
+/* ================= 03 涂乳剂 ================= */
+let initS3=function(){
+const c=ctx(3),cv=$('cv3');
+const rows=new Uint8Array(S.h);let painting=false,curY=null,pct=0,done=false;
+function coatRow(y){const i=Math.round(y-S.y);
+  for(let k=-26;k<=26;k++){const j=i+k;if(j>=0&&j<S.h)rows[j]=1;}}
+function calc(){let n=0;for(let i=0;i<S.h;i++)n+=rows[i];pct=n/S.h;
+  $('coatPct').textContent=Math.round(pct*100)+'%';
+  if(pct>=.95&&!done){$('done3').disabled=false;say(3,'刮匀了。点「进入曝光」——乳剂需要在暗处晾干,我们直接跳到干燥后。','good');}}
+function draw(){
+  c.clearRect(0,0,760,500);
+  c.fillStyle='#1E1412';c.fillRect(0,0,760,500);
+  drawFrame(c);drawMesh(c,5.4,.5,0);
+  /* emulsion rows */
+  c.fillStyle=EMUL;
+  for(let i=0;i<S.h;i++)if(rows[i]){c.globalAlpha=.88;c.fillRect(S.x,S.y+i,S.w,1);}
+  c.globalAlpha=1;
+  /* coater */
+  if(curY!==null){
+    c.fillStyle='#B9BDC1';c.strokeStyle='#7d6a60';
+    c.beginPath();c.roundRect(S.x-14,curY-14,S.w+28,24,5);c.fill();c.stroke();
+    c.fillStyle=EMUL;c.fillRect(S.x-8,curY+8,S.w+16,4);
+    label(c,'上浆器 · 贴网匀速拉',S.x+S.w/2,curY-24,'#C9B4A8');
+  }
+  c.fillStyle='#9d8073';c.font=MONO;
+  c.fillText('安全灯下 · 感光乳剂(重氮型)',S.x,S.y-30);
+}
+cv.addEventListener('pointerdown',e=>{if(done)return;painting=true;cv.setPointerCapture(e.pointerId);
+  const p=pos(cv,e);curY=Math.min(S.y+S.h-1,Math.max(S.y,p.y));coatRow(curY);calc();draw();});
+cv.addEventListener('pointermove',e=>{if(!painting)return;
+  const p=pos(cv,e);const ny=Math.min(S.y+S.h-1,Math.max(S.y,p.y));
+  const a=Math.min(curY,ny),b=Math.max(curY,ny);
+  for(let y=a;y<=b;y+=2)coatRow(y);curY=ny;calc();draw();});
+addEventListener('pointerup',()=>{if(painting){painting=false;curY=null;draw();
+  if(pct<.95&&pct>0&&!done)say(3,'还有露网的地方——没糊住的网孔之后会漏墨。覆盖率 '+Math.round(pct*100)+'%');}});
+$('done3').addEventListener('click',()=>{if(done)return;done=true;stats.coat=Math.round(pct*100);
+  say(3,'✓ 乳剂干燥完毕(实际要在避光柜里晾 1–2 小时)。','good');finish(3);});
+draw();say(3,'从网底部按住,往上拉。');
+};
+
+/* ================= 04 曝光 ================= */
+let colSegs=null;
+function getColSegs(){ /* columns of red art that block light */
+  if(colSegs)return colSegs;const segs=[];let s=null;
+  for(let x=0;x<AW;x+=2){let blk=false;
+    for(let y=0;y<AH;y+=4){if(inRed(x,y)){blk=true;break;}}
+    if(blk&&s===null)s=x;if(!blk&&s!==null){segs.push([s,x]);s=null;}}
+  if(s!==null)segs.push([s,AW]);colSegs=segs;return segs;
+}
+let initS4=function(){
+const c=ctx(4);let exp=0,hold=false,state='idle',raf;/* idle|ok|fail */
+const L={glass:150,film:176,emul:206,mesh:236,lampY:400};
+function draw(t){
+  c.clearRect(0,0,760,500);
+  c.fillStyle='#150D0C';c.fillRect(0,0,760,500);
+  const X=120,W=520;
+  /* UV rays */
+  if(hold||state==='ok'){
+    c.save();c.strokeStyle='rgba(123,92,255,'+(hold?.8:.35)+')';c.lineWidth=2;c.setLineDash([7,9]);
+    c.lineDashOffset=-(t/18)%16;
+    const segs=getColSegs().map(([a,b])=>[X+40+a/AW*(W-80),X+40+b/AW*(W-80)]);
+    for(let x=X+30;x<X+W-20;x+=22){
+      const blocked=segs.some(([a,b])=>x>=a&&x<=b);
+      c.beginPath();c.moveTo(x,L.lampY-14);c.lineTo(x,blocked?L.film+12:L.emul+8);c.stroke();
+      if(blocked){c.fillStyle='rgba(123,92,255,.5)';c.beginPath();c.arc(x,L.film+14,2.5,0,7);c.fill();}
+    }
+    c.restore();}
+  /* lamp */
+  c.fillStyle=hold?'#7B5CFF':'#3a2a55';c.fillRect(X+20,L.lampY,W-40,16);
+  label(c,'紫外灯箱'+(hold?' · 亮':''),X+W/2,L.lampY+38,hold?'#B9A5FF':'#8f7266');
+  /* layers */
+  function bar(y,h,col,name){c.fillStyle=col;c.fillRect(X+30,y,W-60,h);
+    c.fillStyle='#9d8073';c.font=MONO;c.textAlign='right';c.fillText(name,X+22,y+h/2+4);c.textAlign='left';}
+  bar(L.glass,9,'rgba(180,215,235,.35)','玻璃压板');
+  /* film with black segments */
+  c.fillStyle='rgba(200,210,220,.16)';c.fillRect(X+30,L.film,W-60,12);
+  c.fillStyle='#050505';
+  getColSegs().forEach(([a,b])=>{c.fillRect(X+40+a/AW*(W-80),L.film,(b-a)/AW*(W-80),12);});
+  c.fillStyle='#9d8073';c.font=MONO;c.textAlign='right';c.fillText('菲林(黑=图案)',X+22,L.film+10);c.textAlign='left';
+  /* emulsion: hardened where light hits */
+  const hard=Math.min(1,exp/72);
+  c.fillStyle=EMUL;c.fillRect(X+30,L.emul,W-60,16);
+  c.fillStyle='rgba(20,45,36,'+(.75*hard)+')';
+  const segs=getColSegs();let px=X+40;
+  const artX=x=>X+40+x/AW*(W-80);
+  let prev=0;
+  segs.forEach(([a,b])=>{c.fillRect(artX(prev),L.emul,artX(a)-artX(prev),16);prev=b;});
+  c.fillRect(artX(prev),L.emul,artX(AW)-artX(prev),16);
+  c.fillStyle='#9d8073';c.font=MONO;c.textAlign='right';c.fillText('感光乳剂',X+22,L.emul+13);c.textAlign='left';
+  bar(L.mesh,7,'rgba(160,160,160,.4)','丝网');
+  /* annotations */
+  if(state==='ok'){
+    label(c,'▉ 晒硬(不溶于水)',X+120,L.emul-42,'#7FBFA8');
+    label(c,'░ 被菲林挡住 · 仍可水洗',X+372,L.emul-42,'#E8C3B4');
+    c.strokeStyle='rgba(232,195,180,.6)';c.lineWidth=1;
+    const [a0,b0]=segs[0]||[100,220];
+    c.beginPath();c.moveTo(artX((a0+b0)/2),L.emul-34);c.lineTo(artX((a0+b0)/2),L.emul-4);c.stroke();
+  }
+  c.fillStyle='#9d8073';c.font=MONO;
+  c.fillText('剖面视图 · 曝光量 '+Math.round(exp)+' 单位(目标 62–82)',X+30,116);
+}
+function tick(t){
+  if(hold)exp=Math.min(100,exp+.55);
+  $('expF').style.width=exp+'%';
+  draw(t);
+  if(state==='idle')raf=requestAnimationFrame(tick);
+}
+$('hold4').addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='idle')return;hold=true;say(4,'曝光中…紫外光正在穿过菲林的透明处');});
+addEventListener('pointerup',()=>{
+  if(!hold||state!=='idle')return;hold=false;
+  if(exp<62){state='fail';say(4,'✗ 曝光不足('+Math.round(exp)+')——乳剂没晒透,一冲水整版会脱落。洗掉重来。','bad');$('redo4').style.display='';}
+  else if(exp>82){state='fail';say(4,'✗ 曝光过度('+Math.round(exp)+')——光绕射钻进菲林边缘,细节糊死。洗掉重来。','bad');$('redo4').style.display='';}
+  else{state='ok';stats.exp=Math.round(exp);
+    say(4,'✓ 曝光 '+stats.exp+' 单位,正合适。图案此刻是乳剂上一块看不见的"潜影"。','good');
+    cancelAnimationFrame(raf);draw(0);finish(4);}
+});
+$('redo4').addEventListener('click',()=>{exp=0;state='idle';$('redo4').style.display='none';say(4,'重新涂布已就绪(帮你省了一步),再试。');tick(0);});
+tick(0);say(4,'按住「按住曝光」,盯着进度条。');
+};
+
+/* ================= 05 显影 ================= */
+let washPts=null;
+let initS5=function(){
+const c=ctx(5),cv=$('cv5');
+if(!washPts){washPts=[];
+  for(let y=0;y<AH;y+=5)for(let x=0;x<AW;x+=5)if(inRed(x,y))washPts.push({x,y,w:false});}
+const em=document.createElement('canvas');em.width=760;em.height=500;
+const ec=em.getContext('2d');
+ec.fillStyle=EMUL;ec.globalAlpha=.92;ec.fillRect(S.x,S.y,S.w,S.h);
+let spraying=false,done=false,washed=0,sprayP=null;
+function draw(){
+  c.clearRect(0,0,760,500);
+  c.fillStyle='#1E1412';c.fillRect(0,0,760,500);
+  /* backlight so open mesh reads bright */
+  c.fillStyle='#F4E9D8';c.fillRect(S.x,S.y,S.w,S.h);
+  drawMesh(c,5.4,.9,0);
+  c.drawImage(em,0,0);
+  drawFrame(c);
+  c.fillStyle='#9d8073';c.font=MONO;
+  c.fillText('冲洗台 · 背后有灯,冲开的地方透亮',S.x,S.y-30);
+  if(sprayP){ /* water jet */
+    c.strokeStyle='rgba(150,200,255,.75)';c.lineWidth=2;
+    for(let i=0;i<7;i++){const a=-Math.PI/2+(i-3)*.13;
+      c.beginPath();c.moveTo(sprayP.x,sprayP.y+52);
+      c.lineTo(sprayP.x+Math.cos(a)*46+(Math.random()*6-3),sprayP.y+52+Math.sin(a)*46);c.stroke();}
+    c.fillStyle='#B9BDC1';c.beginPath();c.roundRect(sprayP.x-9,sprayP.y+52,18,34,4);c.fill();
+  }
+}
+function spray(p){
+  const A=c2a(p.x,p.y);let hit=false;
+  washPts.forEach(pt=>{if(!pt.w&&(pt.x-A.x)**2+(pt.y-A.y)**2<24*24){pt.w=true;washed++;hit=true;
+    const cc=a2c(pt.x,pt.y);
+    ec.save();ec.globalCompositeOperation='destination-out';
+    ec.beginPath();ec.arc(cc.x,cc.y,7,0,7);ec.fill();ec.restore();}});
+  const pct=washed/washPts.length;
+  $('washPct').textContent=Math.round(pct*100)+'%';
+  if(!hit&&Math.random()<.06&&!done)say(5,'这里晒硬了,水冲不动——只有图案处(没见过光)才冲得开。');
+  if(pct>=.95&&!done){done=true;
+    say(5,'✓ 显影完成。对着光看:图案成了网上透亮的镂空,这就是网版。','good');
+    sprayP=null;draw();finish(5);}
+}
+cv.addEventListener('pointerdown',e=>{if(done)return;spraying=true;cv.setPointerCapture(e.pointerId);
+  sprayP=pos(cv,e);spray(sprayP);draw();});
+cv.addEventListener('pointermove',e=>{if(!spraying||done)return;sprayP=pos(cv,e);spray(sprayP);draw();});
+addEventListener('pointerup',()=>{if(spraying){spraying=false;sprayP=null;draw();}});
+draw();say(5,'按住鼠标,对着图案区域来回冲。');
+};
+
+/* ================= 06 对位 ================= */
+const regRes={dx:0,dy:0};
+let initS6=function(){
+const c=ctx(6),cv=$('cv6');
+let off={dx:26*(Math.random()<.5?-1:1)+Math.random()*10,dy:22*(Math.random()<.5?-1:1)+Math.random()*10};
+let drag=null,locked=false;
+const marks=[[-20,-20],[AW+20,-20],[-20,AH+20],[AW+20,AH+20]];
+function cross(cx,cy,col){c.strokeStyle=col;c.lineWidth=1.5;
+  c.beginPath();c.moveTo(cx-9,cy);c.lineTo(cx+9,cy);c.moveTo(cx,cy-9);c.lineTo(cx,cy+9);c.stroke();
+  c.beginPath();c.arc(cx,cy,5.5,0,7);c.stroke();}
+function draw(){
+  c.clearRect(0,0,760,500);paperBG(c);
+  label(c,'印刷台(俯视) · 拖动纸张',380,36,'#8B8574');
+  /* paper with its crosses */
+  const px=AX-24+off.dx,py=AY-20+off.dy,pw=AW*SC+48,ph=AH*SC+40;
+  c.save();c.shadowColor='rgba(0,0,0,.14)';c.shadowBlur=10;c.shadowOffsetY=3;
+  c.fillStyle='#FFFFFF';c.fillRect(px,py,pw,ph);c.restore();
+  marks.forEach(([mx,my])=>{const p=a2c(mx,my);cross(p.x+off.dx,p.y+off.dy,'#B7B19F');});
+  /* screen overlay w/ its crosses */
+  c.save();c.globalAlpha=.5;drawMesh(c,5.4,.5,0);c.restore();
+  c.save();c.globalAlpha=.25;
+  const st=a2c(0,0);c.drawImage(redMask,st.x,st.y,AW*SC,AH*SC);c.restore();
+  marks.forEach(([mx,my])=>{const p=a2c(mx,my);cross(p.x,p.y,C1);});
+  drawFrame(c);
+  const err=Math.hypot(off.dx,off.dy),mm=err/3;
+  $('regRead').textContent=mm.toFixed(1)+' mm';
+  $('lock6').disabled=locked||mm>2;
+  c.fillStyle='#57534A';c.font=MONO;
+  c.fillText('红十字 = 网版对位标   灰十字 = 纸上对位标',S.x,S.y+S.h+42);
+}
+cv.addEventListener('pointerdown',e=>{if(locked)return;drag=pos(cv,e);cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!drag||locked)return;const p=pos(cv,e);
+  off.dx+=p.x-drag.x;off.dy+=p.y-drag.y;drag=p;draw();
+  const mm=Math.hypot(off.dx,off.dy)/3;
+  say(6,mm<=2?'可以了——锁定台面!':mm<6?'接近了,慢一点,微调。':'');});
+addEventListener('pointerup',()=>drag=null);
+$('lock6').addEventListener('click',()=>{if(locked)return;locked=true;
+  regRes.dx=off.dx;regRes.dy=off.dy;stats.regmm=+(Math.hypot(off.dx,off.dy)/3).toFixed(1);
+  say(6,'✓ 台面锁定,残余偏差 '+stats.regmm+' mm。这个误差会跟着你到套色那一步。','good');
+  draw();finish(6);});
+draw();say(6,'拖动白纸,让灰十字对上红十字。');
+};
+
+/* ================= 07 刮印 ================= */
+const finalPrint=document.createElement('canvas');finalPrint.width=380;finalPrint.height=470;
+let initS7=function(){
+const c=ctx(7),cv=$('cv7');
+let pass=1,inked=false,pulling=false,sweepY=S.y,printedTo=S.y,lifted=false,done=false,liftT=0,raf=null;
+const layers=[]; /* {tint,dx,dy} completed passes */
+function tintOf(){return pass===1?redTint:blueTint;}
+function offOf(){return pass===1?{dx:0,dy:0}:{dx:regRes.dx,dy:regRes.dy};}
+function drawPrintOn(cc){ /* completed layers onto main canvas */
+  cc.save();cc.globalCompositeOperation='multiply';cc.globalAlpha=.92;
+  layers.forEach(L=>cc.drawImage(L.tint,AX+L.dx,AY+L.dy,AW*SC,AH*SC));
+  cc.restore();}
+function draw(){
+  c.clearRect(0,0,760,500);paperBG(c);
+  /* paper */
+  c.save();c.shadowColor='rgba(0,0,0,.12)';c.shadowBlur=8;c.shadowOffsetY=2;
+  c.fillStyle='#fff';c.fillRect(AX-24,AY-20,AW*SC+48,AH*SC+40);c.restore();
+  drawPrintOn(c);
+  /* current pass partial */
+  if(printedTo>S.y){
+    const o=offOf();
+    c.save();c.beginPath();c.rect(S.x,S.y,S.w,printedTo-S.y);c.clip();
+    c.globalCompositeOperation='multiply';c.globalAlpha=.92;
+    c.drawImage(tintOf(),AX+o.dx,AY+o.dy,AW*SC,AH*SC);c.restore();}
+  const fy=lifted?S.y-46-liftT*160:S.y;
+  if(!done||lifted){
+    /* screen: stencil visible */
+    c.save();c.globalAlpha=lifted?.85:.6;
+    drawMesh(c,5.4,.5,0,fy);
+    c.globalAlpha=lifted?.5:.3;c.fillStyle=EMUL;
+    c.fillRect(S.x,fy,S.w,S.h);
+    c.globalCompositeOperation='destination-out';
+    const m=pass===1?redMask:blueMask;
+    c.drawImage(m,AX,fy+(AY-S.y),AW*SC,AH*SC);
+    c.restore();
+    drawFrame(c,fy);
+    /* ink bead */
+    if(inked&&!lifted){
+      const by=Math.max(S.y+8,Math.min(sweepY,S.y+S.h-14));
+      c.fillStyle=pass===1?C1:C2;
+      c.beginPath();c.roundRect(S.x+18,by,S.w-36,12,6);c.fill();
+      c.globalAlpha=.35;c.fillRect(S.x+18,S.y+8,S.w-36,Math.max(0,by-S.y-8));c.globalAlpha=1;}
+    /* squeegee */
+    if(pulling){
+      c.fillStyle='#3A3A38';c.fillRect(S.x+6,sweepY-6,S.w-12,10);
+      c.fillStyle='#C9A96B';c.fillRect(S.x+S.w/2-52,sweepY-26,104,20);
+      label(c,'刮刀 75° · 匀速到底',S.x+S.w/2,sweepY-38,'#57534A');}
+  }
+  c.fillStyle='#57534A';c.font=MONO;
+  c.fillText(lifted?'抬网 · 看看这一色':'第 '+pass+' 色 · '+(pass===1?'红版已装框':'蓝版已装框(带着你的对位误差)'),S.x,S.y-30);
+}
+$('ink7').addEventListener('click',()=>{if(done||lifted)return;
+  inked=true;sweepY=S.y+8;printedTo=Math.max(printedTo,S.y);
+  say(7,'墨已就位。按住鼠标,从网顶一口气拖到网底。');draw();});
+cv.addEventListener('pointerdown',e=>{
+  if(!inked||lifted||done)return;const p=pos(cv,e);
+  if(p.y>S.y+110){say(7,'刮刀要从最上端起刀——回到网顶按住。');return;}
+  pulling=true;sweepY=Math.max(S.y+8,p.y);cv.setPointerCapture(e.pointerId);draw();});
+cv.addEventListener('pointermove',e=>{if(!pulling)return;const p=pos(cv,e);
+  sweepY=Math.min(S.y+S.h,Math.max(sweepY,p.y));printedTo=Math.max(printedTo,Math.min(sweepY,AY+AH*SC));
+  draw();});
+addEventListener('pointerup',()=>{
+  if(!pulling)return;pulling=false;
+  if(sweepY>=S.y+S.h-16){inked=false;$('lift7').disabled=false;
+    say(7,'✓ 一刀到底,墨全数压过网孔。抬网。','good');}
+  else{inked=false;
+    say(7,'✗ 中途松手,下半截没吃到墨——重新倒墨,再来一刀(从顶端)。','bad');}
+  draw();});
+$('lift7').addEventListener('click',()=>{
+  if(lifted)return;lifted=true;liftT=0;$('lift7').disabled=true;
+  layers.push({tint:tintOf(),...offOf()});printedTo=S.y;
+  const anim=()=>{liftT=Math.min(1,liftT+.06);draw();
+    if(liftT<1){raf=requestAnimationFrame(anim);return;}
+    if(pass===1){pass=2;lifted=false;liftT=0;
+      $('passRead').textContent='第 2 色 · 蓝版';
+      say(7,'红色印好了。换上蓝版网框——倒墨,再来一刀。');draw();}
+    else{done=true;lifted=false;
+      /* compose final print */
+      const f=finalPrint.getContext('2d');
+      f.fillStyle='#FFFFFF';f.fillRect(0,0,380,470);
+      f.globalCompositeOperation='multiply';f.globalAlpha=.92;
+      f.drawImage(redTint,30,35,320,400);
+      f.drawImage(blueTint,30+regRes.dx/SC,35+regRes.dy/SC,320,400);
+      f.globalCompositeOperation='source-over';f.globalAlpha=1;
+      say(7,'✓ 两色套印完成'+(stats.regmm>.7?'——能看到 '+stats.regmm+' mm 的套色错位,这是手工印的指纹。':',对得几乎严丝合缝,漂亮。'),'good');
+      draw();finish(7);}
+  };anim();});
+draw();say(7,'先点「倒墨」。');
+};
+
+/* ================= 08 烘干 ================= */
+let initS8=function(){
+const c=ctx(8);let t=-1,cured=false;
+function draw(){
+  c.clearRect(0,0,760,500);paperBG(c);
+  if(!cured&&t<0){ /* waiting */
+    tunnel(0);
+    const s=.42;c.save();c.shadowColor='rgba(0,0,0,.12)';c.shadowBlur=8;
+    c.fillStyle='#fff';c.drawImage(finalPrint,60,160,380*s,470*s);c.restore();
+    label(c,'湿墨 · 未固化',60+380*s/2,160+470*s+22);return;}
+  if(!cured){ /* animating */
+    tunnel(t);
+    const s=.42,x=60+(560-60)*t,y=160;
+    c.save();
+    if(x+380*s>230&&x<530){c.beginPath();c.rect(0,0,760,500);} /* keep visible inside */
+    c.fillStyle='#fff';c.drawImage(finalPrint,x,y,380*s,470*s);c.restore();
+    return;}
+  /* done: framed final */
+  const s=.62,w=380*s,h=470*s,x=380-w/2,y=250-h/2;
+  c.save();c.shadowColor='rgba(0,0,0,.2)';c.shadowBlur=18;c.shadowOffsetY=6;
+  c.fillStyle='#fff';c.fillRect(x-10,y-10,w+20,h+20);c.restore();
+  c.drawImage(finalPrint,x,y,w,h);
+  c.strokeStyle='#E2DED2';c.strokeRect(x-10,y-10,w+20,h+20);
+  /* edition mark */
+  c.fillStyle='#57534A';c.font='13px Georgia,serif';
+  c.fillText('1 / 1',x+6,y+h+34);c.textAlign='right';
+  c.fillText('“日与山” · 丝网版画 · 两色',x+w-6,y+h+34);c.textAlign='left';
+  label(c,'160°C · 45s · 已固化',380,y-24,'#3E7C6B');
+}
+function tunnel(tt){
+  c.fillStyle='#D8D4C8';c.fillRect(230,120,300,270);
+  c.fillStyle='#C4BFB0';c.fillRect(230,120,300,26);
+  label(c,'烘道 160°C',380,110,'#8B8574');
+  c.strokeStyle='rgba(226,73,47,.5)';c.lineWidth=2;
+  for(let i=0;i<5;i++){const hx=265+i*55;
+    c.beginPath();
+    for(let y=370;y>170;y-=8)c.lineTo(hx+Math.sin((y+tt*300)/14)*7,y);
+    c.stroke();}
+  c.fillStyle='#8B8574';for(let x=240;x<520;x+=24)c.fillRect(x,392,14,5);
+}
+$('cure8').addEventListener('click',()=>{
+  if(cured||t>=0)return;t=0;$('cure8').disabled=true;
+  say(8,'进烘道了…水性墨在 160°C 下交联固化');
+  const anim=()=>{t+=.008;draw();
+    if(t<1){requestAnimationFrame(anim);return;}
+    cured=true;draw();$('save8').style.display='';
+    say(8,'✓ 固化完成。这张是你的了。','good');
+    $('recap').className='recap show';
+    $('recap').innerHTML=
+      '你这一版的参数 ——<br>'+
+      '网布 <b>'+stats.mesh+' 目</b> · 张力 <b>'+stats.tension+' N/cm</b><br>'+
+      '乳剂覆盖 <b>'+stats.coat+'%</b> · 曝光 <b>'+stats.exp+' 单位</b><br>'+
+      '套色偏差 <b>'+stats.regmm+' mm</b> · 印数 <b>2 色 / 1 张</b>';
+    finish(8);};
+  anim();});
+$('save8').addEventListener('click',()=>{
+  const out=document.createElement('canvas');out.width=760;out.height=940;
+  const o=out.getContext('2d');o.fillStyle='#F6F4EE';o.fillRect(0,0,760,940);
+  o.drawImage(finalPrint,0,0,380,470,0,0,760,940);
+  const a=document.createElement('a');a.download='silkscreen-print.png';
+  a.href=out.toDataURL('image/png');a.click();});
+draw();
+};
+
+$('restart').addEventListener('click',()=>location.reload());
+
+</script>
+</body>
+</html>
