@@ -43,7 +43,6 @@ Mistakes also become part of the experience: exposure can fail, registration can
 
 ## Run Locally
 
-Clone the repository:
+Download the repository and open `index.html` in your browser.
 
-```bash
-git clone https://github.com/ashlynnlee/How-to-Screen-Printing.git
+No installation or build process is required.
